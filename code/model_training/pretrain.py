@@ -31,7 +31,7 @@ def check_file(path):
         return False
     return True
 
-# ================= 原有的单输入 Dataset =================
+#The original single-input Dataset
 class Dataset(Dataset):
     def __init__(self, x, y):
         self.x = x
@@ -96,7 +96,7 @@ class SpatialDataset(Dataset):
 
         return torch.tensor(input_data, dtype=torch.float32).to(self.config.device), torch.tensor(output_data, dtype=torch.float32).to(self.config.device)
 
-# ================= 新增的双输入 Hybrid Dataset =================
+# The Newly Added Dual-Input Hybrid Dataset
 class HybridTemporalDataset(Dataset):
     def __init__(self, years, config):
         self.years = years
@@ -166,7 +166,7 @@ class HybridSpatialDataset(Dataset):
                 torch.tensor(point_data, dtype=torch.float32).to(self.config.device),
                 torch.tensor(output_data, dtype=torch.float32).to(self.config.device))
 
-# ================= 工具函数 =================
+# Utility Functions
 def setup_logging(args):
     os.makedirs("log", exist_ok=True)
     log_file = f"log/pretrain_{args.model}_{args.valid_type}_{args.id}.log" if args.valid_type == 'temporal' else f"log/pretrain_{args.model}_{args.valid_type}_fold{args.spatial_fold}.log"
@@ -209,7 +209,7 @@ def main():
     log("Starting pretraining script...")
     config = Config()
 
-    # 根据模型类型选择 Dataset
+    # Select a Dataset based on the model type.
     try:
         if args.model == 'hybrid_cnn_lstm':
             if args.valid_type == 'temporal':
@@ -256,7 +256,7 @@ def main():
         batch_count = 0
 
         for batch_idx, batch_data in enumerate(train_dataloader):
-            # 清爽的拆包逻辑
+            # Clean Unpacking Logic
             if args.model == 'hybrid_cnn_lstm':
                 batch_patch, batch_X, batch_y = batch_data
                 if torch.isnan(batch_patch).any() or torch.isnan(batch_X).any() or torch.isnan(batch_y).any():
@@ -326,7 +326,7 @@ def main():
 
                 save_model(model, args)
 
-                # 额外保存一份给 finetune.py 的 --load_pretrain 使用
+                # Save an additional copy for use with `finetune.py`'s `--load_pretrain` argument.
                 base_model_path = f'../model_save/{args.model}/base_model.pth'
                 torch.save(model.state_dict(), base_model_path)
 
