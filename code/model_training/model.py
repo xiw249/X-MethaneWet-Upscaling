@@ -318,7 +318,7 @@ class HybridCNNLSTM(nn.Module):
         self.patch_channels = configs.patch_channels
         self.point_input_size = configs.point_input_size
 
-        # 空间分支
+        # Spatial Branching
         self.cnn = nn.Sequential(
             nn.Conv2d(self.patch_channels, 32, kernel_size=3, padding=1),
             nn.ReLU(),
@@ -327,13 +327,13 @@ class HybridCNNLSTM(nn.Module):
             nn.AdaptiveAvgPool2d((1, 1))
         )
 
-        # 点位分支
+        # Point Branch
         self.point_mlp = nn.Sequential(
             nn.Linear(self.point_input_size, 32),
             nn.ReLU()
         )
 
-        # 时序分支
+        # Temporal Branch
         self.lstm = nn.LSTM(
             input_size=64,
             hidden_size=configs.hidden_size,
