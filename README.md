@@ -14,11 +14,13 @@ In this project, we extend that representation to include both:
 - Local spatial patch input: `(365, 15, 3, 3)`
 
 The patch input is centered on the same grid cell as the original point input and provides local neighborhood context. We implement a HybridCNNLSTM model that combines a CNN-based spatial branch with an LSTM-based temporal branch.
+
 ## Project Context
 
-This repository was developed to address the specific task of wetland methane emission upscaling. While exploring data mining and feature attribution approaches for the existing pipeline, we identified a fundamental bottleneck: a severe point-to-area spatial mismatch. 
+This repository was developed to address the specific task of wetland methane emission upscaling. While exploring data mining and feature attribution approaches for the existing pipeline, we identified a fundamental bottleneck: a point-to-area spatial mismatch.
 
-To tackle this upscaling challenge, we focused on improving the input representation. This repository contains the data engineering and architectural modifications (the patch-augmented HybridCNNLSTM) implemented to resolve this spatial mismatch, providing a stronger foundation for grid-level emission predictions.
+To tackle this upscaling challenge, we focused on improving the input representation. This repository contains the data engineering and architectural modifications implemented to support a patch-augmented HybridCNNLSTM pipeline, providing a stronger foundation for grid-level methane emission prediction.
+
 ## Main Contributions
 
 - Added patch-augmented preprocessing for FLUXNET-CH4.
@@ -32,20 +34,25 @@ To tackle this upscaling challenge, we focused on improving the input representa
 ## Repository Structure
 
 ```text
-code/
-├── data_processing/
-│   ├── FLUXNET-CH4.py      # Generates point and patch inputs for FLUXNET-CH4
-│   └── TEM-MDM.py          # Generates point and patch inputs for TEM-MDM
-│
-├── model_training/
-│   ├── adversarial.py      # Original adversarial transfer learning script
-│   ├── base_model.py       # Original base model training script
-│   ├── config.py           # Configuration settings
-│   ├── finetune.py         # Scratch and pretrained FLUXNET finetuning
-│   ├── model.py            # Model architectures, including HybridCNNLSTM
-│   ├── pretrain.py         # TEM-MDM pretraining with best-checkpoint saving
-│   ├── residual.py         # Original residual learning script
-│   └── reweight.py         # Original reweighting script
+.
+├── code/
+│   ├── data_processing/
+│   │   ├── FLUXNET-CH4.py      # Generates point and patch inputs for FLUXNET-CH4
+│   │   └── TEM-MDM.py          # Generates point and patch inputs for TEM-MDM
+│   │
+│   ├── model_training/
+│   │   ├── adversarial.py      # Original adversarial transfer learning script
+│   │   ├── base_model.py       # Original base model training script
+│   │   ├── config.py           # Configuration settings
+│   │   ├── finetune.py         # Scratch and pretrained FLUXNET finetuning
+│   │   ├── model.py            # Model architectures, including HybridCNNLSTM
+│   │   ├── pretrain.py         # TEM-MDM pretraining with best-checkpoint saving
+│   │   ├── residual.py         # Original residual learning script
+│   │   └── reweight.py         # Original reweighting script
+│   │
+│   └── model_save/
+│       └── hybrid_cnn_lstm/
+│           └── base_model.pth  # Small pretrained HybridCNNLSTM checkpoint
 │
 ├── requirements.txt
 └── README.md
@@ -53,13 +60,19 @@ code/
 
 ## Data
 
-Raw X-MethaneWet data are not included in this repository because the dataset files are large. Please download the original data from the X-MethaneWet source(https://github.com/ymsun99/X-MethaneWet) and place them under:
+Raw X-MethaneWet data are not included in this repository because the dataset files are large. Please follow the original X-MethaneWet repository instructions to download the data, then place the data under:
 
 ```text
 data/
 ```
 
-The expected high-level structure is:
+Original X-MethaneWet repository:
+
+```text
+https://github.com/ymsun99/X-MethaneWet
+```
+
+The expected high-level data structure is:
 
 ```text
 data/
@@ -104,6 +117,8 @@ Install the required Python packages:
 pip install -r requirements.txt
 ```
 
+The provided `requirements.txt` contains the core dependencies needed for the HybridCNNLSTM preprocessing, pretraining, and finetuning pipeline. The original transformer-based models may require additional dependencies from the Time-Series-Library repository.
+
 If using the original transformer-based models, clone the Time Series Library into the `model_training/` directory:
 
 ```bash
@@ -123,6 +138,32 @@ python TEM-MDM.py
 ```
 
 These scripts generate both point-level inputs and patch-level inputs.
+
+## Pretrained Checkpoint
+
+This repository includes a small pretrained HybridCNNLSTM checkpoint at:
+
+```text
+code/model_save/hybrid_cnn_lstm/base_model.pth
+```
+
+This checkpoint was obtained from TEM-MDM temporal pretraining and corresponds to the best validation checkpoint used for FLUXNET finetuning. It is provided for convenience so that users can directly run pretrained FLUXNET finetuning with `--load_pretrain` without rerunning TEM-MDM pretraining first.
+
+To use the checkpoint, run:
+
+```bash
+cd code/model_training
+
+python finetune.py \
+  --valid_type temporal \
+  --model hybrid_cnn_lstm \
+  --id pretrained_realpatch \
+  --epoch 30 \
+  --lr 0.001 \
+  --load_pretrain
+```
+
+The checkpoint is small and included only for reproducibility. Other generated model checkpoints, logs, raw data files, and processed NumPy arrays are not included in this repository.
 
 ## Training
 
@@ -144,6 +185,8 @@ This saves the best pretrained checkpoint as:
 ```text
 ../model_save/hybrid_cnn_lstm/base_model.pth
 ```
+
+The provided `base_model.pth` checkpoint corresponds to this TEM-MDM pretraining result.
 
 ### 2. FLUXNET Temporal Finetuning
 
@@ -168,12 +211,12 @@ python finetune.py \
   --lr 0.001 \
   --load_pretrain
 ```
-The provided `requirements.txt` contains the core dependencies needed for the HybridCNNLSTM preprocessing, pretraining, and finetuning pipeline. The original transformer-based models may require additional dependencies from the Time-Series-Library repository.
+
 ## Experimental Results
 
 Main results from our experiments:
 
-| Experiment | RMSE | R2 |
+| Experiment | RMSE | R² |
 |---|---:|---:|
 | Scratch, FLUXNET temporal | 31.39 | -0.434 |
 | Scratch, FLUXNET spatial | 82.97 | -0.284 |
@@ -198,6 +241,8 @@ This project adds a dual-input format for HybridCNNLSTM:
 ```text
 (x_patch, x_point, y)
 ```
+
+The included `base_model.pth` is the only checkpoint intentionally tracked in this repository. Other checkpoints should be regenerated through the training commands above.
 
 ## Citation
 
