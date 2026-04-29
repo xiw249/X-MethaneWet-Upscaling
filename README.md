@@ -14,7 +14,11 @@ In this project, we extend that representation to include both:
 - Local spatial patch input: `(365, 15, 3, 3)`
 
 The patch input is centered on the same grid cell as the original point input and provides local neighborhood context. We implement a HybridCNNLSTM model that combines a CNN-based spatial branch with an LSTM-based temporal branch.
+## Project Context
 
+This repository was developed to address the specific task of wetland methane emission upscaling. While exploring data mining and feature attribution approaches for the existing pipeline, we identified a fundamental bottleneck: a severe point-to-area spatial mismatch. 
+
+To tackle this upscaling challenge, we focused on improving the input representation. This repository contains the data engineering and architectural modifications (the patch-augmented HybridCNNLSTM) implemented to resolve this spatial mismatch, providing a stronger foundation for grid-level emission predictions.
 ## Main Contributions
 
 - Added patch-augmented preprocessing for FLUXNET-CH4.
