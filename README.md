@@ -55,14 +55,12 @@ git clone https://github.com/thuml/Time-Series-Library.git
    cd code/model_training
 
    # Train on TEM-MDM data
-   python pretrain.py --valid_type temporal --model lstm --epoch 30 --id run1
-
-   # Pretrain base model
-   python base_model.py --model lstm --epoch 30
+   python pretrain.py --valid_type temporal --model hybrid_cnn_lstm --epoch 30 --id run2_best --lr 0.003
 
    # Fine-tune on FLUXNET-CH4 data
-   python finetune.py --valid_type temporal --model lstm --id run1 --epoch 50 --load_pretrain
-   python finetune.py --valid_type spatial --model lstm --epoch 50 --spatial_fold 0 --load_pretrain
+   python finetune.py --valid_type temporal --model hybrid_cnn_lstm --id pretrained_realpatch --epoch 30 --lr 0.001 --load_pretrain
+   python finetune.py --valid_type spatial --model hybrid_cnn_lstm --id pretrained_realpatch --epoch 30 --lr 0.001 --load_pretrain
+   
 
    # Residual modeling 
    python residual.py --valid_type temporal --model lstm --id run1 --epoch 200 --lr 0.02
