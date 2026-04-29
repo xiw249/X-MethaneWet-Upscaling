@@ -43,21 +43,29 @@ code/
 │   ├── residual.py         # Original residual learning script
 │   └── reweight.py         # Original reweighting script
 │
+├── requirements.txt
 └── README.md
-Data
+```
+
+## Data
 
 Raw X-MethaneWet data are not included in this repository because the dataset files are large. Please download the original data from the X-MethaneWet source and place them under:
 
+```text
 data/
+```
 
 The expected high-level structure is:
 
+```text
 data/
-└── TEM-MDM/
+├── TEM-MDM/
 └── FLUXNET-CH4/
+```
 
 After preprocessing, generated files should be saved under:
 
+```text
 processed_data/
 ├── TEM-MDM/
 │   ├── temporal/
@@ -65,9 +73,11 @@ processed_data/
 └── FLUXNET-CH4/
     ├── temporal/
     └── spatial/
+```
 
 Important generated files include:
 
+```text
 # FLUXNET temporal
 train_data_x.npy
 train_patch_x.npy
@@ -80,27 +90,41 @@ test_data_y.npy
 input_YYYY.npy
 patch_input_YYYY.npy
 output_YYYY.npy
-Setup
+```
 
-Install the required Python packages according to the original X-MethaneWet environment. The project uses PyTorch, NumPy, xarray, scikit-learn, and related scientific computing libraries.
+## Setup
 
-If using the original transformer-based models, clone the Time Series Library into the model_training/ directory:
+Install the required Python packages:
 
+```bash
+pip install -r requirements.txt
+```
+
+If using the original transformer-based models, clone the Time Series Library into the `model_training/` directory:
+
+```bash
 cd code/model_training
 git clone https://github.com/thuml/Time-Series-Library.git
-Preprocessing
+```
+
+## Preprocessing
 
 Run the preprocessing scripts first:
 
+```bash
 cd code/data_processing
 
 python FLUXNET-CH4.py
 python TEM-MDM.py
+```
 
 These scripts generate both point-level inputs and patch-level inputs.
 
-Training
-1. TEM-MDM Pretraining
+## Training
+
+### 1. TEM-MDM Pretraining
+
+```bash
 cd code/model_training
 
 python pretrain.py \
@@ -109,11 +133,17 @@ python pretrain.py \
   --epoch 30 \
   --id run2_best \
   --lr 0.003
+```
 
 This saves the best pretrained checkpoint as:
 
+```text
 ../model_save/hybrid_cnn_lstm/base_model.pth
-2. FLUXNET Temporal Finetuning
+```
+
+### 2. FLUXNET Temporal Finetuning
+
+```bash
 python finetune.py \
   --valid_type temporal \
   --model hybrid_cnn_lstm \
@@ -121,7 +151,11 @@ python finetune.py \
   --epoch 30 \
   --lr 0.001 \
   --load_pretrain
-3. FLUXNET Spatial Finetuning
+```
+
+### 3. FLUXNET Spatial Finetuning
+
+```bash
 python finetune.py \
   --valid_type spatial \
   --model hybrid_cnn_lstm \
@@ -129,47 +163,58 @@ python finetune.py \
   --epoch 30 \
   --lr 0.001 \
   --load_pretrain
-Experimental Results
+```
+
+## Experimental Results
 
 Main results from our experiments:
 
-Experiment	RMSE	R2
-Scratch, FLUXNET temporal	31.39	-0.434
-Scratch, FLUXNET spatial	82.97	-0.284
-Pretrain, TEM-MDM temporal	63.74	0.968
-Pretrained, FLUXNET temporal	18.24	0.516
-Pretrained, FLUXNET spatial	75.73	-0.070
+| Experiment | RMSE | R2 |
+|---|---:|---:|
+| Scratch, FLUXNET temporal | 31.39 | -0.434 |
+| Scratch, FLUXNET spatial | 82.97 | -0.284 |
+| Pretrain, TEM-MDM temporal | 63.74 | 0.968 |
+| Pretrained, FLUXNET temporal | 18.24 | 0.516 |
+| Pretrained, FLUXNET spatial | 75.73 | -0.070 |
 
 TEM-MDM pretraining substantially improves FLUXNET temporal finetuning and also improves spatial finetuning, although spatial generalization to unseen FLUXNET sites remains challenging.
 
-Notes
+## Notes
 
 This repository is an extension of the original X-MethaneWet codebase. The main difference is the addition of point-plus-patch dual-input learning for HybridCNNLSTM.
 
 The original workflow uses a single-input format:
 
+```text
 (x, y)
+```
 
 This project adds a dual-input format for HybridCNNLSTM:
 
+```text
 (x_patch, x_point, y)
-Citation
+```
+
+## Citation
 
 If you use the original X-MethaneWet dataset, please cite:
 
+```bibtex
 @article{sun2025x,
   title={X-MethaneWet: A Cross-scale Global Wetland Methane Emission Benchmark Dataset for Advancing Science Discovery with AI},
   author={Sun, Yiming and Chen, Shuo and Chen, Shengyu and Qiu, Chonghao and Liu, Licheng and Oh, Youmi and Malone, Sparkle L and McNicol, Gavin and Zhuang, Qianlai and Smith, Chris and Xie, Yiqun and Jia, Xiaowei},
   journal={arXiv preprint arXiv:2505.18355},
   year={2025}
 }
-Acknowledgement
+```
+
+## Acknowledgement
 
 This project builds on the original X-MethaneWet dataset and codebase. Our contribution is the patch-augmented preprocessing and HybridCNNLSTM training pipeline for point-plus-patch methane emission upscaling.
 
-Contact
+## Contact
 
 For questions about this project extension, please contact:
 
-Xiaoyan Wei
+Xiaoyan Wei  
 xiw249@pitt.edu
