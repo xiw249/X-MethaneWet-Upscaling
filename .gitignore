@@ -1,0 +1,26 @@
+# Data files
+data/
+processed_data/
+*.npy
+*.npz
+*.nc
+*.csv
+
+# Model checkpoints
+*.pth
+*.pt
+model_save/
+log/
+
+# Python cache
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# IDE files
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
