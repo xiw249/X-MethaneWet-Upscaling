@@ -53,7 +53,7 @@ code/
 
 ## Data
 
-Raw X-MethaneWet data are not included in this repository because the dataset files are large. Please download the original data from the X-MethaneWet source and place them under:
+Raw X-MethaneWet data are not included in this repository because the dataset files are large. Please download the original data from the X-MethaneWet source(https://github.com/ymsun99/X-MethaneWet) and place them under:
 
 ```text
 data/
