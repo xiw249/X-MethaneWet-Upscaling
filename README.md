@@ -164,7 +164,7 @@ python finetune.py \
   --lr 0.001 \
   --load_pretrain
 ```
-
+The provided `requirements.txt` contains the core dependencies needed for the HybridCNNLSTM preprocessing, pretraining, and finetuning pipeline. The original transformer-based models may require additional dependencies from the Time-Series-Library repository.
 ## Experimental Results
 
 Main results from our experiments:
